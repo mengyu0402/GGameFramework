@@ -7,7 +7,7 @@ namespace sgPlugins.Sockets
 	/// <summary>
 	/// socket base
 	/// </summary>
-	public abstract class sgSocketBase : IMessageCode, ISocketEvent, ILog, IDisposable
+	internal abstract class sgSocketBase : IMessageCode, ISocketEvent, ILog, IDisposable
 	{
 		#region Interface
 		/// <summary>
