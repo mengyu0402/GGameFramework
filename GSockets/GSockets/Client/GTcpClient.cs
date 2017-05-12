@@ -55,7 +55,7 @@ namespace GSockets.Client
 
 				state = NetState.Connected;
 
-				if (action != null) action.Invoke();
+				action?.Invoke();
 			}
 			catch (Exception ex)
 			{ 
@@ -170,11 +170,9 @@ namespace GSockets.Client
 		{
 			try
 			{
-				if (socket == null) return;
-
 				byte[] buf = ToBytes(msgId, type, message);
 
-				socket.BeginSend(buf, 0, buf.Length, SocketFlags.None, new AsyncCallback(SendEnd), null);
+				socket?.BeginSend(buf, 0, buf.Length, SocketFlags.None, new AsyncCallback(SendEnd), null);
 			}
 			catch (Exception ex)
 			{
@@ -192,9 +190,7 @@ namespace GSockets.Client
 		{
 			try 
 			{ 
-				if (socket == null) return;
-
-				socket.EndSend(ar);
+				socket?.EndSend(ar);
 			}
 			catch(Exception ex) 
 			{
@@ -211,10 +207,9 @@ namespace GSockets.Client
 		{
 			try 
 			{ 
-				if (socket == null) return;
 				if (state != NetState.Connected) return;
 
-				socket.BeginReceive(bufStream.buff, bufStream.position, bufStream.length, SocketFlags.None, new AsyncCallback(ReceiveEnd), null);
+				socket?.BeginReceive(bufStream.buff, bufStream.position, bufStream.length, SocketFlags.None, new AsyncCallback(ReceiveEnd), null);
 			}
 			catch (Exception ex)
 			{ 
@@ -234,7 +229,10 @@ namespace GSockets.Client
 			{
 				int size = socket.EndReceive(ar);
 
+				//重置长度
+				bufStream.length += size;
 				//make packet
+				PacketProcess();
 			}
 			catch (Exception ex)
 			{
@@ -246,6 +244,35 @@ namespace GSockets.Client
 			{
 				ReceiveBegin();
 			}
+		}
+
+		/// <summary>
+		/// 包分解
+		/// </summary>
+		void PacketProcess()
+		{
+			int offset = bufStream.position;
+			int length = bufStream.position + bufStream.length;
+
+			while (offset < length)
+			{
+				GNetPacket netPacket = packet.ToNetPacket(bufStream.buff, offset, length);
+
+				if (netPacket == null) break;
+
+				OnMessageEvent(this, netPacket);
+			}
+
+			//封包处理完成
+			if (offset >= length) { bufStream.Zero(); return; }
+
+			//封包内容过长
+			if (offset == 0) return;
+
+			//未处理完成，挪动数据
+			Buffer.BlockCopy(bufStream.buff, offset, bufStream.buff, 0, length - offset);
+			bufStream.position = 0;
+			bufStream.length = length - offset;
 		}
 	}
 }

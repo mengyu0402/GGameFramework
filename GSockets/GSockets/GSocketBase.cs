@@ -96,7 +96,9 @@ namespace GSockets
 		/// <param name="args">Arguments.</param>
 		protected void PrintLog(string format, params object[] args)
 		{
-			if (writeLog && log != null) log(format, args);
+			if (!writeLog) return;
+
+			log?.Invoke(format, args);
 		}
 
 		/// <summary>
@@ -107,9 +109,7 @@ namespace GSockets
 		/// <param name="optionValue">Option value.</param>
 		public void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, object optionValue)
 		{
-			if (socket == null) return;
-
-			socket.SetSocketOption(optionLevel, optionName, optionValue);
+			socket?.SetSocketOption(optionLevel, optionName, optionValue);
 		}
 
 		/// <summary>
@@ -117,13 +117,10 @@ namespace GSockets
 		/// </summary>
 		public void Dispose()
 		{
-			if (socket != null)
-			{
-				socket.Shutdown(SocketShutdown.Both);
-				socket.Close();
+			socket?.Shutdown(SocketShutdown.Both);
+			socket?.Close();
 
-				if(onDisconnect != null) onDisconnect(this);
-			}
+			onDisconnect?.Invoke(this);
 
 			Release();
 		}
@@ -146,6 +143,25 @@ namespace GSockets
 		protected void CheckEvent()
 		{ 
 			if (encode == null || decode == null) throw new Exception("endcode or decode is null!");
+		}
+
+		/// <summary>
+		/// 接受数据，处理数据
+		/// </summary>
+		/// <param name="own">Own.</param>
+		/// <param name="netPacket">Net packet.</param>
+		protected void OnMessageEvent(object own, GNetPacket netPacket)
+		{
+			onMessage?.Invoke(own, netPacket.msgId, OnDecodeEvent(netPacket.body));
+		}
+
+		/// <summary>
+		/// 解析封包事件
+		/// </summary>
+		/// <param name="body">Body.</param>
+		protected object OnDecodeEvent(byte[] body)
+		{
+			return decode?.Invoke(body);
 		}
 	}
 }
