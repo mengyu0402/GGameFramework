@@ -33,6 +33,27 @@ namespace GSockets
 		}
 
 		/// <summary>
+		/// Resize the specified size.
+		/// </summary>
+		/// <returns>The resize.</returns>
+		/// <param name="size">Size.</param>
+		public void Resize(int size)
+		{
+			if (buff == null)
+			{
+				buff = new byte[size];
+			}
+			else 
+			{
+				byte[] temp = buff;
+				int len = length;
+				buff = new byte[size];
+				Zero();
+				PutBytes(temp, len);
+			}
+		}
+
+		/// <summary>
 		/// clear buf
 		/// </summary>
 		public void Zero() { length = position = 0; }

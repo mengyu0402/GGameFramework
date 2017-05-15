@@ -46,12 +46,6 @@ namespace GSockets
 	public interface ISocketEvent
 	{
 		/// <summary>
-		/// data buffer
-		/// </summary>
-		/// <value>The buffer stream.</value>
-		IBuffStream bufStream { get; set; }
-
-		/// <summary>
 		/// disconnect event
 		/// </summary>
 		event OnDisconnect onDisconnect;
@@ -93,6 +87,13 @@ namespace GSockets
 		/// <param name="buf">Buffer.data buf</param>
 		/// <param name="len">Length.copy len</param>
 		void PutBytes(byte[] buf, int len);
+
+		/// <summary>
+		/// Resize the specified size.
+		/// </summary>
+		/// <returns>The resize.</returns>
+		/// <param name="size">Size.</param>
+		void Resize(int size);
 	}
 
 	/// <summary>

@@ -39,6 +39,8 @@
     <Compile Include="GBuffStream.cs" />
     <Compile Include="Client\GTcpClient.cs" />
     <Compile Include="Listener\GTcpListener.cs" />
+    <Compile Include="Listener\GSession.cs" />
+    <Compile Include="Listener\GSessionManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -9,6 +9,13 @@ namespace GSockets
 	/// </summary>
 	public abstract class GSocketBase : IMessageCode, ISocketEvent, ILog, IDisposable
 	{
+		#region Dedine
+		protected const string NONE = "None";
+		protected const string LOG_ON_MESSAGE = "OnMessageEvent : msgId:{0} type:{1}";
+		protected const string LOG_DISPOSE = "Dispose! addr:{0}";
+		protected const string LOG_SET_OPTION = "SetSocketOption : Level:{0} Name:{1} Value:{2}";
+  		#endregion
+
 		#region Interface
 		/// <summary>
 		/// is write log
@@ -42,15 +49,14 @@ namespace GSockets
 		public event OnMessage onMessage;
 
 		/// <summary>
+		/// ping event
+		/// </summary>
+		public event OnPing onPing;
+
+		/// <summary>
 		/// packet maker
 		/// </summary>
 		public IPacket packet { get; set; }
-
-		/// <summary>
-		/// data buffer
-		/// </summary>
-		/// <value>The buffer stream.</value>
-		public IBuffStream bufStream { get; set; }
 
 		#endregion
 
@@ -71,13 +77,17 @@ namespace GSockets
 		protected IPEndPoint address;
 
 		/// <summary>
+		/// rpc event;
+		/// </summary>
+		//protected event OnRPC onRpc;
+
+		/// <summary>
 		/// Initializes
 		/// </summary>
 		public GSocketBase(IPAddress addr, int port)
 		{
 			address = new IPEndPoint(addr, port);
 			packet = new GPacket();
-			bufStream = new GBuffStream(64*1024);
 		}
 
 		/// <summary>
@@ -112,6 +122,8 @@ namespace GSockets
 			if (socket == null) return;
 
 			socket.SetSocketOption(optionLevel, optionName, optionValue);
+
+            PrintLog(LOG_SET_OPTION, optionLevel, optionName, optionValue);
 		}
 
 		/// <summary>
@@ -125,6 +137,8 @@ namespace GSockets
 				socket.Close();
 			}
 
+			PrintLog(LOG_DISPOSE, addr);
+
 			if(onDisconnect != null) onDisconnect(this);
 
 			Release();
@@ -135,11 +149,12 @@ namespace GSockets
 		/// </summary>
 		/// <returns>The bytes.</returns>
 		/// <param name="msgId">Message identifier.</param>
+		/// <param name="routeId">Route identifier.</param>
 		/// <param name="type">Type.</param>
 		/// <param name="message">Message.</param>
-		protected byte[] ToBytes(uint msgId, byte type, object message)
+		internal byte[] ToBytes(uint msgId, uint routeId, byte type, object message)
 		{
-			return packet.ToByte(msgId, SocketDefine.PACKET_STREAM, encode(message));
+			return packet.ToByte(msgId, type, encode(message));
 		}
 
 		/// <summary>
@@ -157,16 +172,21 @@ namespace GSockets
 		/// <param name="netPacket">Net packet.</param>
 		protected void OnMessageEvent(object own, GNetPacket netPacket)
 		{
-			if(onMessage != null) onMessage(own, netPacket.msgId, OnDecodeEvent(netPacket.body));
-		}
+			switch (netPacket.type)
+			{ 
+				case SocketDefine.PACKET_PING:
+					if (onPing != null) onPing(own);
+					break;
+				case SocketDefine.PACKET_STREAM:
+					if(onMessage != null) onMessage(own, netPacket.msgId, decode(netPacket.msgId, netPacket.body));
+					break;
+				case SocketDefine.PACKET_RPC:
+					break;
+				default:
+					break;
+			}
 
-		/// <summary>
-		/// 解析封包事件
-		/// </summary>
-		/// <param name="body">Body.</param>
-		protected object OnDecodeEvent(byte[] body)
-		{
-			return decode != null ? decode(body) : null;
+           	PrintLog(LOG_ON_MESSAGE, netPacket.msgId, netPacket.type);
 		}
 	}
 }
