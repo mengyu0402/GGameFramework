@@ -27,7 +27,17 @@ namespace GSockets.Listener.Session
 		/// <summary>
 		/// The buffer stream.
 		/// </summary>
-		internal GBuffStream stream = null;
+		GBuffStream stream = null;
+
+		/// <summary>
+		/// Initializes
+		/// </summary>
+		/// <returns>The initializes.</returns>
+		/// <param name="lenth">Lenth.</param>
+		/// <typeparam name="TBuff">The 1st type parameter.</typeparam>
+		internal void Initializes<TBuff>(int lenth)
+		{ 
+		}
 
 		/// <summary>
 		/// Release this instance.

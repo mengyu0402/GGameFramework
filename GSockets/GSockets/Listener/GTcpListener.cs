@@ -18,6 +18,11 @@ namespace GSockets.Listener
 		public int listenMax;
 
 		/// <summary>
+		/// set buff lenth
+		/// </summary>
+		public int recvBuffLen = 8192;
+
+		/// <summary>
 		/// accept event
 		/// </summary>
 		public event OnAccept onAccept;
@@ -81,6 +86,7 @@ namespace GSockets.Listener
 
 				GSession session = sessionManager.GetSession(this, s);
 
+				session.Initializes<TBuff>(recvBuffLen);
 				session.ReceiveBegin();
 
 				if(onAccept != null) onAccept(session);
