@@ -10,10 +10,10 @@ namespace GSockets
 	public abstract class GSocketBase : IMessageCode, ISocketEvent, ILog, IDisposable
 	{
 		#region Dedine
-		protected const string NONE = "None";
-		protected const string LOG_ON_MESSAGE = "OnMessageEvent : msgId:{0} type:{1}";
-		protected const string LOG_DISPOSE = "Dispose! addr:{0}";
-		protected const string LOG_SET_OPTION = "SetSocketOption : Level:{0} Name:{1} Value:{2}";
+		protected const string NONE 			= "None";
+		protected const string LOG_ON_MESSAGE 	= "OnMessageEvent : msgId:{0} type:{1}";
+		protected const string LOG_DISPOSE 		= "Dispose! addr:{0}";
+		protected const string LOG_SET_OPTION 	= "SetSocketOption : Level:{0} Name:{1} Value:{2}";
   		#endregion
 
 		#region Interface
@@ -104,7 +104,7 @@ namespace GSockets
 		/// </summary>
 		/// <param name="format">Format.</param>
 		/// <param name="args">Arguments.</param>
-		protected void PrintLog(string format, params object[] args)
+		internal void PrintLog(string format, params object[] args)
 		{
 			if (!writeLog) return;
 
@@ -170,7 +170,7 @@ namespace GSockets
 		/// </summary>
 		/// <param name="own">Own.</param>
 		/// <param name="netPacket">Net packet.</param>
-		protected void OnMessageEvent(object own, GNetPacket netPacket)
+		internal void OnMessageEvent(object own, GNetPacket netPacket)
 		{
 			switch (netPacket.type)
 			{ 

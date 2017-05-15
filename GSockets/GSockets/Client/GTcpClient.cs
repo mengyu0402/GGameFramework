@@ -312,7 +312,13 @@ namespace GSockets.Client
 				if (socket != null) return;
 				if (state != NetState.Connected) return;
 
-				socket.BeginReceive(bufStream.buff, bufStream.position, bufStream.length, SocketFlags.None, new AsyncCallback(ReceiveEnd), null);
+				socket.BeginReceive(
+					bufStream.buff, 
+					bufStream.position, 
+					bufStream.buff.Length - (bufStream.position + bufStream.length),
+					SocketFlags.None, 
+					new AsyncCallback(ReceiveEnd), 
+					this);
 			}
 			catch (Exception ex)
 			{ 

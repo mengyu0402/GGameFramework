@@ -45,8 +45,11 @@ namespace GSockets.Listener
 		/// <summary>
 		/// run listener
 		/// </summary>
-		public void Start()
+		public void Start(int pool=200)
 		{
+			CheckEvent();
+			//default size
+			sessionManager.Resize(pool);
 			//create socket
 			socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			//bind
@@ -107,6 +110,8 @@ namespace GSockets.Listener
 		public void Stop()
 		{
 			if (socket == null) return;
+
+			sessionManager.Release();
 
 			Dispose();
 		}
