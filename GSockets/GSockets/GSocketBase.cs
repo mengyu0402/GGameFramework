@@ -98,7 +98,7 @@ namespace GSockets
 		{
 			if (!writeLog) return;
 
-			log?.Invoke(format, args);
+			if(log != null) log(format, args);
 		}
 
 		/// <summary>
@@ -109,7 +109,9 @@ namespace GSockets
 		/// <param name="optionValue">Option value.</param>
 		public void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, object optionValue)
 		{
-			socket?.SetSocketOption(optionLevel, optionName, optionValue);
+			if (socket == null) return;
+
+			socket.SetSocketOption(optionLevel, optionName, optionValue);
 		}
 
 		/// <summary>
@@ -117,10 +119,13 @@ namespace GSockets
 		/// </summary>
 		public void Dispose()
 		{
-			socket?.Shutdown(SocketShutdown.Both);
-			socket?.Close();
+			if (socket != null) 
+			{
+				socket.Shutdown(SocketShutdown.Both);
+				socket.Close();
+			}
 
-			onDisconnect?.Invoke(this);
+			if(onDisconnect != null) onDisconnect(this);
 
 			Release();
 		}
@@ -152,7 +157,7 @@ namespace GSockets
 		/// <param name="netPacket">Net packet.</param>
 		protected void OnMessageEvent(object own, GNetPacket netPacket)
 		{
-			onMessage?.Invoke(own, netPacket.msgId, OnDecodeEvent(netPacket.body));
+			if(onMessage != null) onMessage(own, netPacket.msgId, OnDecodeEvent(netPacket.body));
 		}
 
 		/// <summary>
@@ -161,7 +166,7 @@ namespace GSockets
 		/// <param name="body">Body.</param>
 		protected object OnDecodeEvent(byte[] body)
 		{
-			return decode?.Invoke(body);
+			return decode != null ? decode(body) : null;
 		}
 	}
 }

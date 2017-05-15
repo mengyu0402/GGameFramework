@@ -55,7 +55,7 @@ namespace GSockets.Client
 
 				state = NetState.Connected;
 
-				action?.Invoke();
+				if(action != null) action.Invoke();
 			}
 			catch (Exception ex)
 			{ 
@@ -104,7 +104,7 @@ namespace GSockets.Client
 				//update state
 				state = NetState.Connected;
 
-				action?.Invoke();
+				if(action != null) action.Invoke();
 			}
 			catch (Exception ex)
 			{ 
@@ -170,9 +170,11 @@ namespace GSockets.Client
 		{
 			try
 			{
+				if (socket != null) return;
+
 				byte[] buf = ToBytes(msgId, type, message);
 
-				socket?.BeginSend(buf, 0, buf.Length, SocketFlags.None, new AsyncCallback(SendEnd), null);
+				socket.BeginSend(buf, 0, buf.Length, SocketFlags.None, new AsyncCallback(SendEnd), null);
 			}
 			catch (Exception ex)
 			{
@@ -190,7 +192,9 @@ namespace GSockets.Client
 		{
 			try 
 			{ 
-				socket?.EndSend(ar);
+				if (socket != null) return;
+
+				socket.EndSend(ar);
 			}
 			catch(Exception ex) 
 			{
@@ -207,9 +211,10 @@ namespace GSockets.Client
 		{
 			try 
 			{ 
+				if (socket != null) return;
 				if (state != NetState.Connected) return;
 
-				socket?.BeginReceive(bufStream.buff, bufStream.position, bufStream.length, SocketFlags.None, new AsyncCallback(ReceiveEnd), null);
+				socket.BeginReceive(bufStream.buff, bufStream.position, bufStream.length, SocketFlags.None, new AsyncCallback(ReceiveEnd), null);
 			}
 			catch (Exception ex)
 			{ 
