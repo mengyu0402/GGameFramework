@@ -5,7 +5,7 @@ namespace GSockets
 	/// <summary>
 	/// Buff stream.
 	/// </summary>
-	internal class GBuffStream : IBuffStream
+	public class GBuffStream : IBuffStream
 	{
 		/// <summary>
 		/// data buffer
@@ -21,6 +21,9 @@ namespace GSockets
 		/// The begin position.
 		/// </summary>
 		public int position { get; set; }
+
+
+		public GBuffStream() { }
 
 		/// <summary>
 		/// Initializes

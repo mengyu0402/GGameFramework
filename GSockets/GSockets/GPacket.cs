@@ -101,7 +101,7 @@ namespace GSockets
 			//包体总长度超过缓冲区长度
 			if ((buffLen + current) > length) return null;
 
-			byte t = buf[++current];
+			byte t = buf[current++];
 
 			GNetPacket packet = new GNetPacket
 			{

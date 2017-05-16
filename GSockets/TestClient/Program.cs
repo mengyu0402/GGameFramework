@@ -1,38 +1,67 @@
 ﻿using System;
+using ProtoBuf;
+using GSockets;
+using GSockets.Client;
+using System.IO;
 
 namespace TestClient
 {
-	public class TestClass
+	[ProtoContract]
+	public class Message
 	{
-		string name = "hello";
+		[ProtoMember(1)]
+		public int test1 = 123456;
 
-		public TestClass(string s)
-		{
-			name = s;
-		}
-		public void TestRun()
-		{
-			Console.WriteLine($"{name} world");
-		}
-	}
+		[ProtoMember(2)]
+		public string test2 = "abcdef";	}
 
 
 	class MainClass
 	{
-		
-
 		public static void Main(string[] args)
 		{
-			TestClass @class = null;
-			@class = @class??new TestClass("cccc");
-			TestClass @class1 = new TestClass("wwwww");
+			GTcpClient<GBuffStream> client = new GTcpClient<GBuffStream>("127.0.0.1", 8192);
 
-			@class?.TestRun();
+			client.decode += (msgId, body) => { 
+				using (MemoryStream stream = new MemoryStream(body))
+				{
+					return Serializer.Deserialize(typeof(Message), stream);
+				}
+			};
 
-			TestClass o = @class ?? class1;
+			client.encode += (message) => { 
+				using (MemoryStream stream = new MemoryStream())
+				{
+					Serializer.Serialize(stream, message);
+					return stream.ToArray();
+				}
+			};
 
-			o?.TestRun();
-			Console.WriteLine("Hello World!");
+			client.onMessage += (own, msgId, message) => { 
+
+				Message msg = message as Message;
+
+				Console.WriteLine(string.Format("OnMessage : sid:{0}, msgId:{1} arg1 : {2}-{3}",
+				                                own.ToString(),
+				                                msgId,
+				                                msg.test1,
+				                                msg.test2
+				                               ));
+				
+			};
+
+			client.Connect(() => {
+				Message msg = new Message();
+				msg.test1 = 8192;
+				msg.test2 = "client connect to server";
+
+				client.SendMessage(101, msg);
+
+				Console.WriteLine("111111111111111");
+			});
+
+			Console.ReadKey();
+			Console.ReadKey();
 			Console.ReadKey();
 		}
 	}

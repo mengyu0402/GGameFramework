@@ -9,6 +9,7 @@ namespace GSockets.Listener.Session
 	/// </summary>
 	public class GSession
 	{
+
 		/// <summary>
 		/// The listener.
 		/// </summary>
@@ -51,6 +52,23 @@ namespace GSockets.Listener.Session
 		}
 
 		/// <summary>
+		/// disconect
+		/// </summary>
+		internal void Disconnect()
+		{
+			if (socket == null) return;
+
+			if (socket.Connected) 
+			{
+				socket.Shutdown(SocketShutdown.Both);
+				socket.Disconnect(false);
+				socket.Close();
+			}
+
+			Release();
+		}
+
+		/// <summary>
 		/// send mesage
 		/// </summary>
 		/// <param name="msgId">Message identifier.</param>
@@ -68,6 +86,7 @@ namespace GSockets.Listener.Session
 			try
 			{
 				if (socket == null) return;
+				if (!socket.Connected) return;
 
 				socket.BeginReceive(
 					stream.buff, 
@@ -95,12 +114,51 @@ namespace GSockets.Listener.Session
 
 				int length = socket.EndReceive(ar);
 
+				stream.length += length;
+
 				//make packet
+				PacketProcess();
 			}
 			catch (Exception ex)
 			{
+				listener.Disconnect(sid);
 				listener.PrintLog("Session - Receive End : sid:{0} message : {1} stack : {2}", sid, ex.Message, ex.StackTrace);
 			}
+			finally
+			{
+				ReceiveBegin();
+			}
+		}
+
+		/// <summary>
+		/// make packet
+		/// </summary>
+		void PacketProcess()
+		{
+			int offset = stream.position;
+			int length = stream.position + stream.length;
+
+			while (offset < length)
+			{
+				GNetPacket netPacket = listener.ToNetPacket(stream.buff, offset, length);
+
+				if (netPacket == null) break;
+
+				offset += netPacket.body.Length + 9;
+
+				listener.OnMessageEvent(this, netPacket);
+			}
+
+			//finish
+			if (offset >= length) { stream.Zero(); return; }
+
+			//封包内容过长
+			if (offset == 0) return;
+
+			//未处理完成，挪动数据
+			Buffer.BlockCopy(stream.buff, offset, stream.buff, 0, length - offset);
+			stream.position = 0;
+			stream.length = length - offset;
 		}
 
 		/// <summary>

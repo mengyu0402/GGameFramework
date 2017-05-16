@@ -112,10 +112,11 @@ namespace GSockets.Client
 				socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 				//connect to host
 				socket.Connect(address);
-				//begin recv message
-				ReceiveBegin();
 
 				state = NetState.Connected;
+
+				//begin recv message
+				ReceiveBegin();
 
 				if(action != null) action.Invoke();
 
@@ -183,7 +184,7 @@ namespace GSockets.Client
 		/// <summary>
 		/// Disconnect to host
 		/// </summary>
-		public void Disconnect()
+		public override void Disconnect(object arg=null)
 		{
 			try
 			{
@@ -268,7 +269,7 @@ namespace GSockets.Client
 		{
 			try
 			{
-				if (socket != null) return;
+				if (socket == null) return;
 
 				byte[] buf = ToBytes(msgId, routeId, type, message);
 
@@ -290,7 +291,7 @@ namespace GSockets.Client
 		{
 			try 
 			{ 
-				if (socket != null) return;
+				if (socket == null) return;
 
 				socket.EndSend(ar);
 			}
@@ -309,7 +310,7 @@ namespace GSockets.Client
 		{
 			try 
 			{ 
-				if (socket != null) return;
+				if (socket == null) return;
 				if (state != NetState.Connected) return;
 
 				socket.BeginReceive(
@@ -336,6 +337,8 @@ namespace GSockets.Client
 		{
 			try
 			{
+				if (socket == null) return;
+
 				int size = socket.EndReceive(ar);
 
 				//重置长度
@@ -356,7 +359,7 @@ namespace GSockets.Client
 		}
 
 		/// <summary>
-		/// 包分解
+		/// make packet
 		/// </summary>
 		void PacketProcess()
 		{
@@ -365,9 +368,11 @@ namespace GSockets.Client
 
 			while (offset < length)
 			{
-				GNetPacket netPacket = packet.ToNetPacket(bufStream.buff, offset, length);
+				GNetPacket netPacket = ToNetPacket(bufStream.buff, offset, length);
 
 				if (netPacket == null) break;
+
+				offset += netPacket.body.Length + 9;
 
 				OnMessageEvent(this, netPacket);
 			}

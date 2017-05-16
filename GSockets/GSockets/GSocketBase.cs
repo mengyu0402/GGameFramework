@@ -133,16 +133,23 @@ namespace GSockets
 		{
 			if (socket != null) 
 			{
-				socket.Shutdown(SocketShutdown.Both);
+				if(socket.Connected) socket.Shutdown(SocketShutdown.Both);
 				socket.Close();
 			}
 
 			PrintLog(LOG_DISPOSE, addr);
 
-			if(onDisconnect != null) onDisconnect(this);
+			OnDisconnetEvent(this);
 
 			Release();
 		}
+
+		/// <summary>
+		/// disconnect event
+		/// </summary>
+		/// <returns>The disconnect.</returns>
+		/// <param name="arg">Argument.</param>
+		public abstract void Disconnect(object arg = null);
 
 		/// <summary>
 		/// make send buf
@@ -155,6 +162,18 @@ namespace GSockets
 		internal byte[] ToBytes(uint msgId, uint routeId, byte type, object message)
 		{
 			return packet.ToByte(msgId, type, encode(message));
+		}
+
+		/// <summary>
+		/// make packet
+		/// </summary>
+		/// <returns>The net packet.</returns>
+		/// <param name="buff">Buff.</param>
+		/// <param name="offset">Offset.</param>
+		/// <param name="length">Length.</param>
+		internal GNetPacket ToNetPacket(byte[] buff, int offset, int length)
+		{
+			return packet.ToNetPacket(buff, offset, length);
 		}
 
 		/// <summary>
@@ -187,6 +206,15 @@ namespace GSockets
 			}
 
            	PrintLog(LOG_ON_MESSAGE, netPacket.msgId, netPacket.type);
+		}
+
+		/// <summary>
+		/// disconnect eveent
+		/// </summary>
+		/// <param name="arg">Argument.</param>
+		protected void OnDisconnetEvent(object arg)
+		{
+			if (onDisconnect != null) onDisconnect(arg);
 		}
 	}
 }

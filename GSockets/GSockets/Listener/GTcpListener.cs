@@ -45,11 +45,8 @@ namespace GSockets.Listener
 		/// <summary>
 		/// run listener
 		/// </summary>
-		public void Start(int pool=200)
+		public void Start()
 		{
-			CheckEvent();
-			//default size
-			sessionManager.Resize(pool);
 			//create socket
 			socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			//bind
@@ -111,8 +108,6 @@ namespace GSockets.Listener
 		{
 			if (socket == null) return;
 
-			sessionManager.Release();
-
 			Dispose();
 		}
 
@@ -121,8 +116,22 @@ namespace GSockets.Listener
 		/// </summary>
 		/// <returns>The disconnect.</returns>
 		/// <param name="session">Session.</param>
-		public void Disconnect(GSession session)
+		public override void Disconnect(object arg=null)
 		{
+			if (arg == null) return;
+
+			if (arg is int)
+			{
+				Disconnect((int)arg);
+			}
+			else 
+			{
+				Disconnect(arg as GSession);
+			}
+		}
+
+		public void Disconnect(GSession session)
+		{ 
 			if (session == null) return;
 
 			Disconnect(session.sid);
@@ -134,7 +143,16 @@ namespace GSockets.Listener
 		/// <returns>The disconnect.</returns>
 		/// <param name="sid">Sid.</param>
 		public void Disconnect(uint sid)
-		{ 
+		{
+			GSession session = sessionManager.GetSession(sid);
+
+			if (session == null) return;
+
+			session.Disconnect();
+
+			OnDisconnetEvent(session);
+
+			sessionManager.Remove(sid);
 		}
 
 		/// <summary>
