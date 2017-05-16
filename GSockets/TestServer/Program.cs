@@ -24,6 +24,11 @@ namespace TestServer
 		{
 			GTcpListener<GSession, GBuffStream> listener = new GTcpListener<GSession, GBuffStream>(8192);
 
+			listener.onPing += (own) => {
+				GSession session = own as GSession;
+
+			};
+
 			listener.decode += (msgId, body) => {
 
 				using (MemoryStream stream = new MemoryStream(body))
