@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSocket_Core", "GSocket_Core\GSocket_Core.csproj", "{6B96AC97-7A3E-47AD-93E9-FE7E9D96D8BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "TestClient\TestClient.csproj", "{FEFA520D-D114-4D2A-8A6C-B5E557C8E6EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestServer", "TestServer\TestServer.csproj", "{9D2C9D28-1A3C-4A97-B89A-6143CDB87212}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6B96AC97-7A3E-47AD-93E9-FE7E9D96D8BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B96AC97-7A3E-47AD-93E9-FE7E9D96D8BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B96AC97-7A3E-47AD-93E9-FE7E9D96D8BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B96AC97-7A3E-47AD-93E9-FE7E9D96D8BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEFA520D-D114-4D2A-8A6C-B5E557C8E6EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEFA520D-D114-4D2A-8A6C-B5E557C8E6EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEFA520D-D114-4D2A-8A6C-B5E557C8E6EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEFA520D-D114-4D2A-8A6C-B5E557C8E6EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D2C9D28-1A3C-4A97-B89A-6143CDB87212}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D2C9D28-1A3C-4A97-B89A-6143CDB87212}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D2C9D28-1A3C-4A97-B89A-6143CDB87212}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D2C9D28-1A3C-4A97-B89A-6143CDB87212}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -32,11 +32,16 @@ namespace GSockets.Listener
 		/// </summary>
 		GSessionManager<TClass, TBuff> sessionManager = new GSessionManager<TClass, TBuff>();
 
-		/// <summary>
-		/// Initializes
-		/// </summary>
-		/// <param name="port">Port.</param>
-		public GTcpListener(int port) 
+        /// <summary>
+        /// accept args
+        /// </summary>
+        SocketAsyncEventArgs acceptArgs = new SocketAsyncEventArgs();
+
+        /// <summary>
+        /// Initializes
+        /// </summary>
+        /// <param name="port">Port.</param>
+        public GTcpListener(int port) 
 			: base(IPAddress.Any, port)
 		{
 			listenMax = 200;
@@ -47,6 +52,10 @@ namespace GSockets.Listener
 		/// </summary>
 		public void Start()
 		{
+            acceptArgs.Completed += AcceptAsyncCompleted;
+
+            CheckEvent();
+
 			//create socket
 			socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			//bind
@@ -54,50 +63,44 @@ namespace GSockets.Listener
 			//listen
 			socket.Listen(listenMax);
 			//accept
-			BeginAccept();
+			AcceptAsyncBegin(acceptArgs);
 		}
 
-		/// <summary>
-		/// begin accept
-		/// </summary>
-		void BeginAccept()
+        private void AcceptAsyncCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            try
+            {
+                GSession session = sessionManager.GetSession(this, e.AcceptSocket);
+
+                session.Initializes<TBuff>(recvBuffLen);
+                session.ReceiveBegin();
+
+                if (onAccept != null) onAccept(session);
+            }
+            catch (Exception ex)
+            {
+                PrintLog("End Accept Error! {0} - {1}", ex.Message, ex.StackTrace);
+            }
+            finally
+            {
+                AcceptAsyncBegin(e);
+            }
+        }
+
+        /// <summary>
+        /// begin accept
+        /// </summary>
+        void AcceptAsyncBegin(SocketAsyncEventArgs args)
 		{
 			try
 			{
 				if (socket == null) return;
-
-                socket.BeginAccept(new AsyncCallback(EndAccept), socket);
+                args.AcceptSocket = null;
+                socket.AcceptAsync(args);
 			}
 			catch (Exception ex)
 			{
 				PrintLog("Accept Error! {0} - {1}", ex.Message, ex.StackTrace);
-			}
-		}
-
-		/// <summary>
-		/// End accept.
-		/// </summary>
-		/// <param name="ar">Ar.</param>
-		void EndAccept(IAsyncResult ar)
-		{
-			try
-			{
-				Socket s = socket.EndAccept(ar);
-
-				GSession session = sessionManager.GetSession(this, s);
-
-				session.Initializes<TBuff>(recvBuffLen);
-				session.ReceiveBegin();
-
-				if(onAccept != null) onAccept(session);
-			}
-			catch (Exception ex)
-			{
-                PrintLog("End Accept Error! {0} - {1}", ex.Message, ex.StackTrace);
-			}
-			finally
-			{
-				BeginAccept();
 			}
 		}
 

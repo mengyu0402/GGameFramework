@@ -13,9 +13,12 @@ namespace TestServer
 		[ProtoMember(1)]
 		public int test1 = 123456;
 
-		[ProtoMember(2)]
-		public string test2 = "abcdef";
-	}
+        [ProtoMember(2)]
+        public byte[] test2 = new byte[3000];
+
+        [ProtoMember(3)]
+        public ulong id;
+    }
 
 
 	class MainClass
@@ -23,8 +26,9 @@ namespace TestServer
 		public static void Main(string[] args)
 		{
 			GTcpListener<GSession, GBuffStream> listener = new GTcpListener<GSession, GBuffStream>(8192);
-
-			listener.onPing += (own) => {
+            listener.log += Listener_log;
+            listener.writeLog = true;
+            listener.onPing += (own) => {
 				GSession session = own as GSession;
 
 			};
@@ -45,22 +49,21 @@ namespace TestServer
 				}
 			};
 
-			listener.onMessage += (own, msgId, message) => {
+            listener.onMessage += (own, msgId, message) => {
 
 				Message msg = message as Message;
 
-				Console.WriteLine(string.Format("OnMessage : sid:{0}, msgId:{1} arg1 : {2}-{3}", 
+				Console.WriteLine(string.Format("OnMessage [{4}]: sid:{0}, msgId:{1} arg1 : {2}-{3}", 
 				                                ((GSession)own).sid,
 				                                msgId,
 				                                msg.test1,
-				                                msg.test2
+				                                "",
+                                                msg.id
 				                               ));
 
-				Message to = new Message();
-				to.test2 = "88888";
-				to.test1 = 99999;
+				
 
-				listener.SendMessage(own as GSession, 100, to);
+				listener.SendMessage(own as GSession, 100, msg);
 			};
 
 			listener.Start();
@@ -73,5 +76,10 @@ namespace TestServer
 
 			Console.WriteLine("Hello World!");
 		}
-	}
+
+        private static void Listener_log(string format, params object[] args)
+        {
+            Console.WriteLine(string.Format(format, args));
+        }
+    }
 }
