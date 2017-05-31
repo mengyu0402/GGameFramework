@@ -28,12 +28,6 @@ namespace GSockets
 		public uint msgId { get; set; }
 
 		/// <summary>
-		/// RPC id
-		/// </summary>
-		/// <value>The route identifier.</value>
-		public uint routeId { get; set; }
-
-		/// <summary>
 		/// packet type
 		/// </summary>
 		/// <value>The type.</value>

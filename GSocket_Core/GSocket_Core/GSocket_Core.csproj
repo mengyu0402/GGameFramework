@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
+    <RootNamespace>GSockets</RootNamespace>
+    <AssemblyName>GSockets</AssemblyName>
   </PropertyGroup>
 
 </Project>

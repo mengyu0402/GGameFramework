@@ -9,6 +9,21 @@ using System.Collections.Generic;
 namespace TestClient
 {
     [ProtoContract]
+    [ProtoInclude(1, typeof(Message))]
+    public class RPCMessage : IRPCMessage
+    {
+        [ProtoMember(1)]
+        public uint routeId { get; set; }
+
+        [ProtoMember(2)]
+        public byte[] message { get; set; }
+
+        public string rpcKey { get; set; }
+        public uint idKey { get; set; }
+
+    }
+
+    [ProtoContract]
     public class Message
     {
         [ProtoMember(1)]
@@ -24,17 +39,24 @@ namespace TestClient
         public ulong id;
     }
 
+    
+
 
     class MainClass
     {
         public static void Main(string[] args)
         {
-            using (GTcpClient<GBuffStream> client = new GTcpClient<GBuffStream>("10.235.156.201", 8192, 1024*20*10))
+            using (GRPCClient<GBuffStream, RPCMessage> client = new GRPCClient<GBuffStream, RPCMessage>("10.235.156.201", 8192, 1024*20*10))
             {
-                client.writeLog = true;
-                client.log += Client_log;
                 client.decode += (msgId, body) =>
                 {
+                    if (msgId == 9999)
+                    {
+                        using (MemoryStream stream = new MemoryStream(body))
+                        {
+                            return Serializer.Deserialize(typeof(RPCMessage), stream);
+                        }
+                    }
                     using (MemoryStream stream = new MemoryStream(body))
                     {
                         return Serializer.Deserialize(typeof(Message), stream);
@@ -50,50 +72,61 @@ namespace TestClient
                     }
                 };
 
-                Dictionary<ulong, Stopwatch> watch = new Dictionary<ulong, Stopwatch>();
 
-              
+
                 ulong count = 0;
                 client.onMessage += (own, msgId, message) =>
                 {
 
-                    Message msg = message as Message;
+                    //Message msg = message as Message;
 
-                    Stopwatch w = null;
-                    watch.TryGetValue(msg.id, out w);
+                    //Stopwatch w = null;
+                    //watch.TryGetValue(msg.id, out w);
 
-                    w.Stop();
-                    watch.Remove(msg.id);
-                    Console.WriteLine(string.Format("OnMessage [{5}]: sid:{0}, msgId:{1} arg1 : {2}-{3} {4}",
-                                                    own.ToString(),
-                                                    msgId,
-                                                    msg.test1,
-                                                    msg.test2,
-                                                    w.ElapsedMilliseconds,
-                                                    msg.id
-                                                   ));
+                    //w.Stop();
+                    //watch.Remove(msg.id);
+                    //Console.WriteLine(string.Format("OnMessage [{5}]: sid:{0}, msgId:{1} arg1 : {2}-{3} {4}",
+                    //                                own.ToString(),
+                    //                                msgId,
+                    //                                msg.test1,
+                    //                                msg.test2,
+                    //                                w.ElapsedMilliseconds,
+                    //                                msg.id
+                    //                               ));
 
                 };
 
-                client.Connect(() =>
-                {
-                    while (true)
-                    {
-                        System.Threading.Thread.Sleep(100);
+                client.Rpc("123", new Message());
+                client.Rpc("321", new Message());
+                client.Rpc("111111111111", new Message());
 
-                        Message msg = new Message();
-                        msg.test1 = 11111111;
-                        msg.test2 = "time call";
-                        msg.id = count++;
+                //client.writeLog = true;
+                //client.log += Client_log;
+              
 
-                        Stopwatch w = new Stopwatch();
-                        watch.Add(msg.id, w);
-                        w.Start();
-                        client.SendMessage(102, msg);
-                    }
-                });
+                //Dictionary<ulong, Stopwatch> watch = new Dictionary<ulong, Stopwatch>();
 
-                
+
+
+                //client.Connect(() =>
+                //{
+                //    while (true)
+                //    {
+                //        System.Threading.Thread.Sleep(100);
+
+                //        Message msg = new Message();
+                //        msg.test1 = 11111111;
+                //        msg.test2 = "time call";
+                //        msg.id = count++;
+
+                //        Stopwatch w = new Stopwatch();
+                //        watch.Add(msg.id, w);
+                //        w.Start();
+                //        client.SendMessage(102, msg);
+                //    }
+                //});
+
+
 
                 Console.ReadKey();
                 Console.ReadKey();

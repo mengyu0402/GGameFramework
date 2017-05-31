@@ -62,6 +62,12 @@
     <Compile Include="..\..\GSocket_Core\GSocket_Core\Listener\GTcpListener.cs">
       <Link>Listener\GTcpListener.cs</Link>
     </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\Client\GRPCClient.cs">
+      <Link>Client\GRPCClient.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\GSocketAttribute.cs">
+      <Link>Client\GSocketAttribute.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

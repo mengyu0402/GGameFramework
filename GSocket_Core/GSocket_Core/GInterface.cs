@@ -2,6 +2,18 @@
 
 namespace GSockets
 {
+    /// <summary>
+    /// rpc 
+    /// </summary>
+    public interface IRPCMessage
+    {
+        uint routeId { get; set; }
+        uint idKey { get; set; }
+        string rpcKey { get; set; }
+        byte[] message { get; set; }
+    }
+
+
 	/// <summary>
 	/// log
 	/// </summary>

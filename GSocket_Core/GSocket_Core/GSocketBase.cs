@@ -9,8 +9,13 @@ namespace GSockets
 	/// </summary>
 	public abstract class GSocketBase : IMessageCode, ISocketEvent, ILog, IDisposable
 	{
-		#region Define
-		protected const string NONE 			= "None";
+        /// <summary>
+        /// rpc msg id
+        /// </summary>
+        public readonly static uint RPC_MSG_ID = uint.MaxValue;
+
+        #region Define
+        protected const string NONE 			= "None";
 		protected const string LOG_ON_MESSAGE 	= "OnMessageEvent : msgId:{0} type:{1}";
 		protected const string LOG_DISPOSE 		= "Dispose! addr:{0}";
 		protected const string LOG_SET_OPTION 	= "SetSocketOption : Level:{0} Name:{1} Value:{2}";
@@ -216,6 +221,8 @@ namespace GSockets
 		{
 			if (onDisconnect != null) onDisconnect(arg);
 		}
+
+        protected object DecodeEvent(byte[] body) { return decode(9999, body); }
 	}
 }
 
