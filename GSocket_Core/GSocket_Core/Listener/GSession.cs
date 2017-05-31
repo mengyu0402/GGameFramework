@@ -75,7 +75,7 @@ namespace GSockets.Listener.Session
 		/// <param name="message">Message.</param>
 		public void SendMessage(uint msgId, object message)
 		{
-			SendBegin(listener.ToBytes(msgId, 0, SocketDefine.PACKET_STREAM, message));
+			SendBegin(listener.ToBytes(msgId, SocketDefine.PACKET_STREAM, message));
 		}
 
 		/// <summary>
@@ -126,34 +126,6 @@ namespace GSockets.Listener.Session
             }
         }
 
-  //      /// <summary>
-  //      /// end recv message
-  //      /// </summary>
-  //      /// <param name="ar">Ar.</param>
-  //      void ReceiveEnd(IAsyncResult ar)
-		//{
-		//	try
-		//	{
-		//		if (socket == null) return;
-
-		//		int length = socket.EndReceive(ar);
-
-		//		stream.length += length;
-
-		//		//make packet
-		//		PacketProcess();
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		listener.Disconnect(sid);
-		//		listener.PrintLog("Session - Receive End : sid:{0} message : {1} stack : {2}", sid, ex.Message, ex.StackTrace);
-		//	}
-		//	finally
-		//	{
-		//		ReceiveBegin();
-		//	}
-		//}
-
 		/// <summary>
 		/// make packet
 		/// </summary>
@@ -203,22 +175,6 @@ namespace GSockets.Listener.Session
 			{ 
 				listener.PrintLog("Session - Send Begin : sid:{0} message : {1} stack : {2}", sid, ex.Message, ex.StackTrace);
 			}
-		}
-
-		/// <summary>
-		/// send buff end
-		/// </summary>
-		/// <param name="ar">Ar.</param>
-		void SendEnd(IAsyncResult ar)
-		{
-			//try
-			//{
-			//	int length = socket.EndSend(ar);
-			//}
-			//catch (Exception ex)
-			//{ 
-			//	listener.PrintLog("Session - Send End : sid:{0} message : {1} stack : {2}", sid, ex.Message, ex.StackTrace);
-			//}
 		}
 	}
 }

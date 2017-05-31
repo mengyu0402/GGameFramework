@@ -110,12 +110,12 @@ namespace GSockets.Client
 
 				//make socket
 				socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
 				//connect to host
 				socket.Connect(address);
-
 				state = NetState.Connected;
 
-				//begin recv message
+				//begin reveive message
 				ReceiveBegin();
 
 				if(action != null) action.Invoke();
@@ -129,57 +129,6 @@ namespace GSockets.Client
 				Dispose();
 			}
 		}
-
-        ///// <summary>
-        ///// Async Connect to host
-        ///// </summary>
-        //public void ConnectAsync(Action action = null)
-        //{ 
-        //	try
-        //	{
-        //		//update state
-        //		state = NetState.Connecting;
-        //		//make socket
-        //		socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        //		//connect to host
-        //		socket.BeginConnect(address, new AsyncCallback(ConnectEnd), action);
-        //	}
-        //	catch (Exception ex)
-        //	{
-        //		PrintLog("ConnectAsync to {1} error! {0} {2}", ex.Message, addr, ex.StackTrace != null ? ex.StackTrace : string.Empty);
-
-        //		Dispose();
-        //	}
-        //}
-
-        ///// <summary>
-        ///// Connect end.
-        ///// </summary>
-        ///// <param name="ar">Ar.</param>
-        //void ConnectEnd(IAsyncResult ar)
-        //{
-        //	try
-        //	{
-        //		Action action = ar.AsyncState as Action;
-
-        //		//connected
-        //		socket.EndConnect(ar);
-        //		//begin recv
-        //		ReceiveBegin();
-        //		//update state
-        //		state = NetState.Connected;
-
-        //		if(action != null) action.Invoke();
-
-        //              PrintLog(LOG_ON_CONNECT, addr);
-        //	}
-        //	catch (Exception ex)
-        //	{ 
-        //		PrintLog("ConnectAsync End to {1} error! {0} {2}", ex.Message, addr, ex.StackTrace != null ? ex.StackTrace : string.Empty);
-
-        //		Dispose();
-        //	}
-        //}
 
         /// <summary>
         /// Disconnect to host
@@ -211,7 +160,7 @@ namespace GSockets.Client
 		{
 			if (state != NetState.Connected) return;
 
-			SendBegin(msgId, 0, SocketDefine.PACKET_STREAM, message);
+			SendBegin(msgId, SocketDefine.PACKET_STREAM, message);
 
 			PrintLog(LOG_ON_SEND, addr, msgId, message != null ? message.GetType().ToString() : NONE);
 		}
@@ -223,38 +172,10 @@ namespace GSockets.Client
 		{ 
 			if (state != NetState.Connected) return;
 
-			SendBegin(0, 0, SocketDefine.PACKET_PING, null);
+			SendBegin(0, SocketDefine.PACKET_PING, null);
 
             PrintLog(LOG_ON_PING, addr, NONE);
 		}
-
-		///// <summary>
-		///// 远程调用
-		///// </summary>
-		///// <returns>The rpc.</returns>
-		///// <param name="msgId">Message identifier.</param>
-		///// <param name="message">Message.</param>
-		///// <param name="action">Action.</param>
-		///// <typeparam name="T">The 1st type parameter.</typeparam>
-		//public void RPC<T>(uint msgId, object message, Action<object> action)
-		//{
-		//	//确定远程调用ID的范围
-		//	if (ROUTE_ID >= ROUTE_MAX) ROUTE_ID = 0;
-
-		//	//累加远程调用ID
-		//	++ ROUTE_ID;
-
-		//	//删除重复项
-		//	if (rpcMap.ContainsKey(ROUTE_ID)) rpcMap.Remove(ROUTE_ID);
-
-		//	//填充数据到结构中
-		//	rpcMap.Add(ROUTE_ID, new RPCNode { routeId = ROUTE_ID, type = typeof(T), action = action});
-
-		//	//发送数据
-		//	SendBegin(msgId, ROUTE_ID, SocketDefine.PACKET_RPC, message);
-
-		//	PrintLog(LOG_ON_RPC, addr, msgId, message.GetType().ToString(), action.ToString());
-		//}
 
 		/// <summary>
 		/// aysnc send buf
@@ -263,13 +184,13 @@ namespace GSockets.Client
 		/// <param name="routeId">Route identifier.</param>
 		/// <param name="type">Type.</param>
 		/// <param name="message">Message.</param>
-		void SendBegin(uint msgId, uint routeId, byte type, object message)
+		void SendBegin(uint msgId, byte type, object message)
 		{
 			try
 			{
 				if (socket == null) return;
 
-				byte[] buf = ToBytes(msgId, routeId, type, message);
+				byte[] buf = ToBytes(msgId, type, message);
 
                 SocketAsyncEventArgs sendArgs = new SocketAsyncEventArgs();
                 sendArgs.SetBuffer(buf, 0, buf.Length);
@@ -281,26 +202,6 @@ namespace GSockets.Client
 
 				Dispose();
 			}
-		}
-
-        /// <summary>
-        /// async send end
-        /// </summary>
-        /// <param name="ar">Ar.</param>
-        void SendEnd(IAsyncResult ar)
-		{
-			//try 
-			//{ 
-			//	if (socket == null) return;
-
-			//	socket.EndSend(ar);
-			//}
-			//catch(Exception ex) 
-			//{
-			//	PrintLog("SendEnd Error! {0} {1}", ex.Message, ex.StackTrace != null ? ex.StackTrace : string.Empty);
-
-			//	Dispose();
-			//}
 		}
 
 		/// <summary>

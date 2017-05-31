@@ -157,10 +157,9 @@ namespace GSockets
 		/// </summary>
 		/// <returns>The bytes.</returns>
 		/// <param name="msgId">Message identifier.</param>
-		/// <param name="routeId">Route identifier.</param>
 		/// <param name="type">Type.</param>
 		/// <param name="message">Message.</param>
-		internal byte[] ToBytes(uint msgId, uint routeId, byte type, object message)
+		internal byte[] ToBytes(uint msgId, byte type, object message)
 		{
 			return packet.ToByte(msgId, type, encode(message));
 		}

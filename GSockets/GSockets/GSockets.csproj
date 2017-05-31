@@ -31,20 +31,37 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GInterface.cs" />
-    <Compile Include="GCommon.cs" />
-    <Compile Include="GPacket.cs" />
-    <Compile Include="GSocketBase.cs" />
-    <Compile Include="GBuffStream.cs" />
-    <Compile Include="Client\GTcpClient.cs" />
-    <Compile Include="Listener\GTcpListener.cs" />
-    <Compile Include="Listener\GSession.cs" />
-    <Compile Include="Listener\GSessionManager.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
     <Folder Include="Client\" />
     <Folder Include="Listener\" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\Client\GTcpClient.cs">
+      <Link>Client\GTcpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\GBuffStream.cs">
+      <Link>GBuffStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\GCommon.cs">
+      <Link>GCommon.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\GInterface.cs">
+      <Link>GInterface.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\GPacket.cs">
+      <Link>GPacket.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\GSocketBase.cs">
+      <Link>GSocketBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\Listener\GSession.cs">
+      <Link>Listener\GSession.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\Listener\GSessionManager.cs">
+      <Link>Listener\GSessionManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\Listener\GTcpListener.cs">
+      <Link>Listener\GTcpListener.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
