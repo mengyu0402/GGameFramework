@@ -9,7 +9,7 @@ namespace GSockets
         /// <summary>
         /// rpc int key
         /// </summary>
-        public int rpcId = int.MinValue;
+        public uint rpcId = uint.MinValue;
 
         /// <summary>
         /// rpc string key
@@ -30,7 +30,7 @@ namespace GSockets
         /// </summary>
         /// <param name="key"></param>
         /// <param name="id"></param>
-        public GRPCAttribute(string key, int id)
+        public GRPCAttribute(string key, uint id)
         {
             rpcKey = key;
             rpcId = id;

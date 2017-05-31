@@ -7,7 +7,7 @@ namespace GSockets.Client
     public class GRPCNode
     {
         public string       key;
-        public int          id;
+        public uint         id;
         public MethodInfo   method;
         public object       obj;
 
@@ -44,7 +44,7 @@ namespace GSockets.Client
         /// rpc handler
         /// the index for id
         /// </summary>
-        Dictionary<int, GRPCNode> idHandler = new Dictionary<int, GRPCNode>();
+        Dictionary<uint, GRPCNode> idHandler = new Dictionary<uint, GRPCNode>();
 
         /// <summary>
         /// object map
@@ -94,7 +94,7 @@ namespace GSockets.Client
         /// </summary>
         /// <param name="id"></param>
         /// <param name="message"></param>
-        void InvokeMethod(int id, object message)
+        void InvokeMethod(uint id, object message)
         {
             GRPCNode node = null;
 
@@ -177,7 +177,13 @@ namespace GSockets.Client
 
             if (ROUTE_BEGIN == uint.MaxValue) ROUTE_BEGIN = 0;
 
+            GRPCNode node = null;
+
+            rpcHandler.TryGetValue(key, out node);
+
             rpc.routeId = ROUTE_BEGIN++;
+            rpc.idKey = node.id;
+            rpc.rpcKey = node.id == uint.MinValue ? null : key;
             rpc.message = ToBytes(rpc.routeId, SocketDefine.PACKET_RPC, message);
 
             return rpc;
