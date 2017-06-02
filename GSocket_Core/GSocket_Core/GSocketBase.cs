@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace GSockets
 {
@@ -81,10 +83,10 @@ namespace GSockets
 		/// </summary>
 		protected IPEndPoint address;
 
-		/// <summary>
-		/// rpc event;
-		/// </summary>
-		//protected event OnRPC onRpc;
+        /// <summary>
+        /// message type map
+        /// </summary>
+        protected Dictionary<uint, Type> messageMap = new Dictionary<uint, Type>();
 
 		/// <summary>
 		/// Initializes
@@ -93,6 +95,8 @@ namespace GSockets
 		{
 			address = new IPEndPoint(addr, port);
 			packet = new GPacket();
+
+            ScanMessage();
 		}
 
 		/// <summary>
@@ -194,7 +198,7 @@ namespace GSockets
 		/// </summary>
 		/// <param name="own">Own.</param>
 		/// <param name="netPacket">Net packet.</param>
-		internal void OnMessageEvent(object own, GNetPacket netPacket)
+		internal virtual void OnMessageEvent(object own, GNetPacket netPacket)
 		{
 			switch (netPacket.type)
 			{ 
@@ -202,9 +206,11 @@ namespace GSockets
 					if (onPing != null) onPing(own);
 					break;
 				case SocketDefine.PACKET_STREAM:
-					if(onMessage != null) onMessage(own, netPacket.msgId, decode(netPacket.msgId, netPacket.body));
-					break;
-				case SocketDefine.PACKET_RPC:
+                    if (onMessage != null)
+                    {
+                        Type type = messageMap[netPacket.msgId];
+                        onMessage(own, netPacket.msgId, decode(netPacket.msgId, type, netPacket.body));
+                    }
 					break;
 				default:
 					break;
@@ -222,7 +228,51 @@ namespace GSockets
 			if (onDisconnect != null) onDisconnect(arg);
 		}
 
-        protected object DecodeEvent(byte[] body) { return decode(9999, body); }
+        /// <summary>
+        /// scan message
+        /// register message
+        /// </summary>
+        protected virtual void ScanMessage()
+        {
+            Assembly assembly = Assembly.GetEntryAssembly();
+
+            foreach (Type type in assembly.GetExportedTypes())
+            {
+                foreach (GMessageAttribute attribute in type.GetTypeInfo().GetCustomAttributes<GMessageAttribute>())
+                {
+                    if (messageMap.ContainsKey(attribute.msgId))
+                    {
+                        throw new Exception("some msgId");
+                    }
+                    messageMap.Add(attribute.msgId, type);
+                }
+            }
+        }
+
+        protected object DecodeEvent(uint msgId, Type type, byte[] body)
+        {
+            if (type == null) type = messageMap[msgId];
+            return decode(msgId, type, body);
+        }
+
+        internal byte[] EncodeEvent(object message)
+        {
+            return encode(message);
+        }
+
+        /// <summary>
+        /// get msgId
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        internal uint GetMsgId(object message)
+        {
+            Type type = message.GetType();
+
+            GMessageAttribute attribute = type.GetTypeInfo().GetCustomAttribute<GMessageAttribute>();
+
+            return attribute == null ? uint.MinValue : attribute.msgId;
+        }
 	}
 }
 

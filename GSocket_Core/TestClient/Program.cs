@@ -8,21 +8,19 @@ using System.Collections.Generic;
 
 namespace TestClient
 {
+    [GRPCMessage]
     [ProtoContract]
-    [ProtoInclude(1, typeof(Message))]
     public class RPCMessage : IRPCMessage
     {
         [ProtoMember(1)]
-        public uint routeId { get; set; }
-
-        [ProtoMember(2)]
         public byte[] message { get; set; }
-
+        [ProtoMember(2)]
         public string rpcKey { get; set; }
+        [ProtoMember(3)]
         public uint idKey { get; set; }
-
     }
 
+    [GMessage]
     [ProtoContract]
     public class Message
     {
@@ -33,9 +31,6 @@ namespace TestClient
         public string test2 = "abcdef";
 
         [ProtoMember(3)]
-        public byte[] test3 = new byte[1024*10];
-
-        [ProtoMember(4)]
         public ulong id;
     }
 
@@ -48,18 +43,11 @@ namespace TestClient
         {
             using (GRPCClient<GBuffStream, RPCMessage> client = new GRPCClient<GBuffStream, RPCMessage>("10.235.156.201", 8192, 1024*20*10))
             {
-                client.decode += (msgId, body) =>
+                client.decode += (msgId, type, body) =>
                 {
-                    if (msgId == 9999)
-                    {
-                        using (MemoryStream stream = new MemoryStream(body))
-                        {
-                            return Serializer.Deserialize(typeof(RPCMessage), stream);
-                        }
-                    }
                     using (MemoryStream stream = new MemoryStream(body))
                     {
-                        return Serializer.Deserialize(typeof(Message), stream);
+                        return Serializer.Deserialize(type, stream);
                     }
                 };
 
@@ -96,35 +84,22 @@ namespace TestClient
 
                 };
 
-                client.Rpc("123", new Message());
-                client.Rpc("321", new Message());
-                client.Rpc("111111111111", new Message());
+                
+
+
 
                 //client.writeLog = true;
                 //client.log += Client_log;
-              
+
 
                 //Dictionary<ulong, Stopwatch> watch = new Dictionary<ulong, Stopwatch>();
 
 
 
-                //client.Connect(() =>
-                //{
-                //    while (true)
-                //    {
-                //        System.Threading.Thread.Sleep(100);
-
-                //        Message msg = new Message();
-                //        msg.test1 = 11111111;
-                //        msg.test2 = "time call";
-                //        msg.id = count++;
-
-                //        Stopwatch w = new Stopwatch();
-                //        watch.Add(msg.id, w);
-                //        w.Start();
-                //        client.SendMessage(102, msg);
-                //    }
-                //});
+                client.Connect(() =>
+                {
+                    client.Rpc("123", new Message());
+                });
 
 
 

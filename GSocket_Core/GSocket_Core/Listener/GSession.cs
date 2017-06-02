@@ -71,11 +71,14 @@ namespace GSockets.Listener.Session
 		/// <summary>
 		/// send mesage
 		/// </summary>
-		/// <param name="msgId">Message identifier.</param>
 		/// <param name="message">Message.</param>
-		public void SendMessage(uint msgId, object message)
+		public void SendMessage(object message)
 		{
-			SendBegin(listener.ToBytes(msgId, SocketDefine.PACKET_STREAM, message));
+            uint msgId = listener.GetMsgId(message);
+
+            if (msgId == uint.MinValue) return;
+
+            SendBegin(listener.ToBytes(msgId, SocketDefine.PACKET_STREAM, message));
 		}
 
 		/// <summary>
@@ -161,7 +164,7 @@ namespace GSockets.Listener.Session
 		/// send buff
 		/// </summary>
 		/// <param name="body">Body.</param>
-		void SendBegin(byte[] body)
+		protected void SendBegin(byte[] body)
 		{
 			try
 			{

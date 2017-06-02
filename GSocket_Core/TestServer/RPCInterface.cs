@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using System.Text;
 using GSockets;
-using GSockets.Client;
+using GSockets.Listener.Session;
 
-namespace TestClient
+namespace TestServer
 {
     public class RPCInterface
     {
         int rand = new Random().Next();
 
         [GRPC("123")]
-        public void RPC1(GRPCClient<GBuffStream, RPCMessage> client, Message message)
+        public Message RPC1(GRPCSession session, Message message)
         {
-            Console.WriteLine("1111111111111:"+ message.test2);
+            Console.WriteLine("1111111111111:" + message.test2);
+            return message;
         }
+
     }
 }

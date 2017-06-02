@@ -7,6 +7,19 @@ using ProtoBuf;
 
 namespace TestServer
 {
+    [GRPCMessage]
+    [ProtoContract]
+    public class RPCMessage : IRPCMessage
+    {
+        [ProtoMember(1)]
+        public byte[] message { get; set; }
+        [ProtoMember(2)]
+        public string rpcKey { get; set; }
+        [ProtoMember(3)]
+        public uint idKey { get; set; }
+    }
+
+    [GMessage]
     [ProtoContract]
     public class Message
     {
@@ -15,9 +28,8 @@ namespace TestServer
 
         [ProtoMember(2)]
         public string test2 = "abcdef";
+
         [ProtoMember(3)]
-        public byte[] test3 = new byte[1024 * 10];
-        [ProtoMember(4)]
         public ulong id;
     }
 
@@ -26,7 +38,7 @@ namespace TestServer
     {
         public static void Main(string[] args)
         {
-            GTcpListener<GSession, GBuffStream> listener = new GTcpListener<GSession, GBuffStream>(8192);
+            GRPCListener<GRPCSession, GBuffStream, RPCMessage> listener = new GRPCListener<GRPCSession, GBuffStream, RPCMessage>(8192);
             listener.writeLog = true;
             listener.log += Listener_log;
             listener.recvBuffLen = 1024 * 20*10;
@@ -38,12 +50,12 @@ namespace TestServer
 
             };
 
-            listener.decode += (msgId, body) =>
+            listener.decode += (msgId, type, body) =>
             {
 
                 using (MemoryStream stream = new MemoryStream(body))
                 {
-                    return Serializer.Deserialize(typeof(Message), stream);
+                    return Serializer.Deserialize(type, stream);
                 }
             };
 
@@ -69,7 +81,7 @@ namespace TestServer
                                                 msg.id
                                                ));
 
-                listener.SendMessage(own as GSession, 100, msg);
+                listener.SendMessage(own as GSession, msg);
             };
 
             listener.Start();

@@ -19,12 +19,12 @@ namespace GSockets.Client
 	/// </summary>
 	public class GTcpClient<TBuff> : GSocketBase where TBuff : IBuffStream
 	{
-		#region Define
-		const string LOG_ON_CONNECT 		= "OnConnect : address:{0}";
-		const string LOG_ON_DISCONNECT 		= "OnDisconnect : address:{0}";
-		const string LOG_ON_SEND 			= "OnSend : address:{0} msgId:{1} type:{2}";
-		const string LOG_ON_PING 			= "OnPing : address:{0} type:{1}";
-		const string LOG_ON_RPC 			= "OnRPC : address:{0} msgId:{1} type:{2}, action:{3}";
+        #region Define
+        protected const string LOG_ON_CONNECT 		= "OnConnect : address:{0}";
+        protected const string LOG_ON_DISCONNECT 	= "OnDisconnect : address:{0}";
+		protected const string LOG_ON_SEND 			= "OnSend : address:{0} msgId:{1} type:{2}";
+        protected const string LOG_ON_PING 			= "OnPing : address:{0} type:{1}";
+        protected const string LOG_ON_RPC 			= "OnRPC : address:{0} msgId:{1} type:{2}, action:{3}";
 		#endregion
 
 		#region RPC
@@ -75,7 +75,7 @@ namespace GSockets.Client
 		/// <summary>
 		/// net state
 		/// </summary>
-		NetState state;
+		protected NetState state;
 
         /// <summary>
         /// data buffer
@@ -153,11 +153,14 @@ namespace GSockets.Client
 		/// <summary>
 		/// Send message.
 		/// </summary>
-		/// <param name="msgId">Message identifier.</param>
 		/// <param name="message">Message.</param>
-		public void SendMessage(uint msgId, object message)
+		public void SendMessage(object message)
 		{
 			if (state != NetState.Connected) return;
+
+            uint msgId = GetMsgId(message);
+
+            if (msgId == uint.MinValue) return;
 
 			SendBegin(msgId, SocketDefine.PACKET_STREAM, message);
 
@@ -183,7 +186,7 @@ namespace GSockets.Client
 		/// <param name="routeId">Route identifier.</param>
 		/// <param name="type">Type.</param>
 		/// <param name="message">Message.</param>
-		void SendBegin(uint msgId, byte type, object message)
+		protected void SendBegin(uint msgId, byte type, object message)
 		{
 			try
 			{

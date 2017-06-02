@@ -11,7 +11,7 @@ namespace GSockets.Listener
 	public class GTcpListener<TClass, TBuff> : GSocketBase 
 		where TClass: GSession 
 		where TBuff : IBuffStream
-	{
+    {
 		/// <summary>
 		/// listen list
 		/// </summary>
@@ -164,11 +164,11 @@ namespace GSockets.Listener
 		/// <param name="own">Own.</param>
 		/// <param name="msgId">Message identifier.</param>
 		/// <param name="message">Message.</param>
-		public void SendMessage(GSession own, uint msgId, object message)
+		public void SendMessage(GSession own, object message)
 		{
 			if (own == null) return;
 
-			own.SendMessage(msgId, message);
+			own.SendMessage(message);
 		}
 	}
 }

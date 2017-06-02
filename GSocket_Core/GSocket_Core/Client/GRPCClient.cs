@@ -1,22 +1,10 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GSockets.Client
 {
-    public class GRPCNode
-    {
-        public string       key;
-        public uint         id;
-        public MethodInfo   method;
-        public object       obj;
-
-        public void Invoke(object message)
-        {
-            method.Invoke(obj, new object[] { message });
-        }
-    }
-
     /// <summary>
     /// rpc client
     /// </summary>
@@ -25,10 +13,6 @@ namespace GSockets.Client
         where TBuff : IBuffStream
         where TRPC  : class, IRPCMessage
     {
-        /// <summary>
-        /// route id
-        /// </summary>
-        uint ROUTE_BEGIN = 0;
 
         /// <summary>
         /// rpc map
@@ -52,6 +36,11 @@ namespace GSockets.Client
         Dictionary<string, object> objectMap = new Dictionary<string, object>();
 
         /// <summary>
+        /// rpc message type
+        /// </summary>
+        Type rpcMessageType = null;
+
+        /// <summary>
         /// construct GRPCClient
         /// </summary>
         /// <param name="host"></param>
@@ -60,19 +49,26 @@ namespace GSockets.Client
         public GRPCClient(string host, int port, int size = 8192)
             : base(host, port)
         {
-            //select rpc interfaces
-            SelectRPCInterface();
+            //scan rpc interfaces
+            ScanRPCInterface();
         }
 
         /// <summary>
         /// select rpc interface
         /// </summary>
-        void SelectRPCInterface()
+        void ScanRPCInterface()
         {
             Assembly assembly = Assembly.GetEntryAssembly();
 
             foreach (Type type in assembly.GetExportedTypes())
             {
+                GRPCMessageAttribute[] attrs =  type.GetTypeInfo().GetCustomAttributes<GRPCMessageAttribute>().ToArray();
+
+                if (attrs.Length > 1) throw new Exception("only one! GRPSMessage");
+                if (rpcMessageType != null && attrs.Length !=0 ) throw new Exception("only one! GRPSMessage");
+
+                rpcMessageType = type;
+                
                 foreach (MethodInfo method in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
                 {
                     foreach(GRPCAttribute rpcAttribute in method.GetCustomAttributes<GRPCAttribute>())
@@ -82,7 +78,7 @@ namespace GSockets.Client
                             objectMap.Add(type.FullName, Activator.CreateInstance(type));
                         }
 
-                        RegisterHandle(objectMap[type.FullName], rpcAttribute, method);
+                        RegisterHandler(objectMap[type.FullName], rpcAttribute, method);
                     }
                 }
 
@@ -94,7 +90,7 @@ namespace GSockets.Client
         /// </summary>
         /// <param name="id"></param>
         /// <param name="message"></param>
-        void InvokeMethod(uint id, object message)
+        void InvokeMethod(uint id, byte[] body)
         {
             GRPCNode node = null;
 
@@ -102,7 +98,7 @@ namespace GSockets.Client
 
             if (node == null) return;
 
-            node.Invoke(message);
+            node.Invoke(this, DecodeEvent(0, node.type, body));
         }
 
         /// <summary>
@@ -110,7 +106,7 @@ namespace GSockets.Client
         /// </summary>
         /// <param name="key"></param>
         /// <param name="message"></param>
-        void InvokeMethod(string key, object message)
+        void InvokeMethod(string key, byte[] body)
         {
             GRPCNode node = null;
 
@@ -118,7 +114,7 @@ namespace GSockets.Client
 
             if (node == null) return;
 
-            node.Invoke(message);
+            node.Invoke(this, DecodeEvent(0, node.type, body));
         }
 
         /// <summary>
@@ -126,17 +122,26 @@ namespace GSockets.Client
         /// </summary>
         /// <param name="attribute"></param>
         /// <param name="method"></param>
-        void RegisterHandle(object o, GRPCAttribute a, MethodInfo m)
+        void RegisterHandler(object o, GRPCAttribute a, MethodInfo m)
         {
             if(rpcHandler.ContainsKey(a.rpcKey))
                 throw new Exception("register handler is error! key="+ a.rpcKey);
 
-            GRPCNode node = new GRPCNode { obj = o, key = a.rpcKey, id = a.rpcId, method = m };
+            ParameterInfo[] param = m.GetParameters();
+
+            if (param.Length < 2) return;
+
+            GRPCNode node = new GRPCNode();
+            node.obj = o;
+            node.id = a.rpcId;
+            node.key = a.rpcKey;
+            node.method = m;
+            node.type = param[1].ParameterType;
 
             rpcHandler.Add(a.rpcKey, node);
 
             //no id
-            if (a.rpcId == int.MinValue) return;
+            if (a.rpcId == uint.MinValue) return;
 
             if(idHandler.ContainsKey(a.rpcId))
                 throw new Exception("register handler is error! id=" + a.rpcId.ToString());
@@ -151,19 +156,11 @@ namespace GSockets.Client
         /// <param name="message"></param>
         public void Rpc(string key, object message)
         {
-            SendMessage(RPC_MSG_ID, MakeRpcMessage(key, message));
+            if (state != NetState.Connected) return;
 
-            //byte[] bs = ToBytes(RPC_MSG_ID, SocketDefine.PACKET_STREAM, rpc);
+            SendBegin(RPC_MSG_ID, SocketDefine.PACKET_RPC, MakeRpcMessage(key, message));
 
-            //GNetPacket o = packet.ToNetPacket(bs, 0, bs.Length);
-
-            //IRPCMessage p1 = DecodeEvent(o.body) as IRPCMessage;
-
-            //GNetPacket o1 = packet.ToNetPacket(p1.message, 0, bs.Length);
-
-            //OnMessageEvent(this, o1);
-
-            //SendMessage(RPC_MSG_ID, MakeRpcMessage(message));
+            PrintLog(LOG_ON_SEND, addr, RPC_MSG_ID, message != null ? message.GetType().ToString() : NONE);
         }
 
         /// <summary>
@@ -175,18 +172,34 @@ namespace GSockets.Client
         {
             IRPCMessage rpc = Activator.CreateInstance(typeof(TRPC)) as IRPCMessage;
 
-            if (ROUTE_BEGIN == uint.MaxValue) ROUTE_BEGIN = 0;
-
             GRPCNode node = null;
 
             rpcHandler.TryGetValue(key, out node);
 
-            rpc.routeId = ROUTE_BEGIN++;
             rpc.idKey = node.id;
-            rpc.rpcKey = node.id == uint.MinValue ? null : key;
-            rpc.message = ToBytes(rpc.routeId, SocketDefine.PACKET_RPC, message);
+            rpc.rpcKey = node.id == uint.MinValue ? key : null;
+            rpc.message = EncodeEvent(message);
 
             return rpc;
+        }
+
+        internal override void OnMessageEvent(object own, GNetPacket netPacket)
+        {
+            if (netPacket.type == SocketDefine.PACKET_RPC)
+            {
+                TRPC packet = DecodeEvent(netPacket.msgId, typeof(TRPC), netPacket.body) as TRPC;
+
+                if (string.IsNullOrEmpty(packet.rpcKey))
+                {
+                    InvokeMethod(packet.idKey, packet.message);
+                }
+                else
+                {
+                    InvokeMethod(packet.rpcKey, packet.message);
+                }
+            }
+
+            base.OnMessageEvent(own, netPacket);
         }
     }
 }

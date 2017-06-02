@@ -16,7 +16,7 @@ namespace GSockets
 	/// <summary>
 	/// Decode message 
 	/// </summary>
-	public delegate object Decode(uint msgId, byte[] body);
+	public delegate object Decode(uint msgId, Type type, byte[] body);
 
 	/// <summary>
 	/// disconnect event
