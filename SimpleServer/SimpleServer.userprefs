@@ -1,0 +1,15 @@
+﻿<Properties StartupConfiguration="{B123D07B-B48B-4386-8E35-9A4945AAA862}|Default">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="SimpleServer\Service\Service.cs">
+    <Files>
+      <File FileName="SimpleServer\Program.cs" Line="22" Column="1" />
+      <File FileName="SimpleServer\Service\Service.cs" Line="3" Column="27" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.SimpleServer PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>
