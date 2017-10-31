@@ -27,51 +27,6 @@ namespace GSockets.Client
         protected const string LOG_ON_RPC 			= "OnRPC : address:{0} msgId:{1} type:{2}, action:{3}";
 		#endregion
 
-		#region RPC
-
-		///// <summary>
-		///// 远程调用结构声明
-		///// </summary>
-		//public class RPCNode
-		//{
-		//	public uint routeId;
-		//	public Action<object> action;
-		//	public Type type;
-		//}
-
-		///// <summary>
-		///// The rpc map.
-		///// </summary>
-		//Dictionary<uint, RPCNode> rpcMap = null;
-
-		///// <summary>
-		///// 远程调用ID
-		///// </summary>
-		//uint ROUTE_ID = 0;
-
-		///// <summary>
-		///// 最大远程调用ID
-		///// </summary>
-		//uint ROUTE_MAX = 100;
-
-		///// <summary>
-		///// 是否启用RPC机制
-		///// </summary>
-		///// <value><c>true</c> if is rpc; otherwise, <c>false</c>.</value>
-		//public bool isRpc
-		//{
-		//	get { return rpcMap != null; }
-		//	set
-		//	{
-		//		if (value == true && rpcMap == null)
-		//		{
-		//			rpcMap = new Dictionary<uint, RPCNode>();
-		//		}
-		//	}
-		//}
-
-  		#endregion
-
 		/// <summary>
 		/// net state
 		/// </summary>
@@ -160,9 +115,21 @@ namespace GSockets.Client
 
             uint msgId = GetMsgId(message);
 
-            if (msgId == uint.MinValue) return;
+			SendMessage(msgId, message);
+		}
 
-			SendBegin(msgId, SocketDefine.PACKET_STREAM, message);
+		/// <summary>
+		/// Sends the message.
+		/// </summary>
+		/// <param name="msgId">Message identifier.</param>
+		/// <param name="message">Message.</param>
+		public void SendMessage(uint msgId, object message)
+		{ 
+			if (state != NetState.Connected) return;
+
+			if (msgId == uint.MinValue) return;
+
+            SendBegin(msgId, SocketDefine.PACKET_STREAM, message);
 
 			PrintLog(LOG_ON_SEND, addr, msgId, message != null ? message.GetType().ToString() : NONE);
 		}

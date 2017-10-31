@@ -7,6 +7,7 @@ using ProtoBuf;
 
 namespace TestServer
 {
+	[GMessage(101)]
 	[ProtoContract]
 	public class Message
 	{
@@ -33,7 +34,7 @@ namespace TestServer
 
 			};
 
-			listener.decode += (msgId, body) => {
+			listener.decode += (msgId, type, body) => {
 
 				using (MemoryStream stream = new MemoryStream(body))
 				{
@@ -63,7 +64,7 @@ namespace TestServer
 
 				
 
-				listener.SendMessage(own as GSession, 100, msg);
+				listener.SendMessage(own as GSession, msg);
 			};
 
 			listener.Start();

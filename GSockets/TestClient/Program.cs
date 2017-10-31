@@ -8,6 +8,7 @@ using System.Collections.Generic;
 
 namespace TestClient
 {
+	[GMessageAttribute(1001)]
 	[ProtoContract]
 	public class Message
 	{
@@ -37,7 +38,7 @@ namespace TestClient
             client.writeLog = true;
             client.log += Client_log;
 
-            client.decode += (msgId, body) => { 
+            client.decode += (msgId, type, body) => { 
 				using (MemoryStream stream = new MemoryStream(body))
 				{
 					return Serializer.Deserialize(typeof(Message), stream);
@@ -91,7 +92,7 @@ namespace TestClient
                     watch.Add(msg.id, node);
 
                     node.w.Start();
-                    client.SendMessage(101, msg);
+                    client.SendMessage(msg);
                 }
             });
 

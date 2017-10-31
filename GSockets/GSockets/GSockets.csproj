@@ -68,6 +68,9 @@
     <Compile Include="..\..\GSocket_Core\GSocket_Core\GSocketAttribute.cs">
       <Link>Client\GSocketAttribute.cs</Link>
     </Compile>
+    <Compile Include="..\..\GSocket_Core\GSocket_Core\GRPCNode.cs">
+      <Link>GRPCNode.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
