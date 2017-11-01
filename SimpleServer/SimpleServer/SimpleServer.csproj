@@ -52,6 +52,7 @@
   <ItemGroup>
     <Folder Include="Tools\" />
     <Folder Include="Service\" />
+    <Folder Include="config\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

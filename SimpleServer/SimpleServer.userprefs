@@ -2,13 +2,30 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="D:\Work\Other\GitHub\GGameFramework\SimpleServer\SimpleServer\Program.cs" relfile="SimpleServer\Program.cs" line="34" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.Workbench ActiveDocument="SimpleServer\Service\Service.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="SimpleServer\Program.cs">
     <Files>
-      <File FileName="SimpleServer\Program.cs" Line="22" Column="1" />
-      <File FileName="SimpleServer\Service\Service.cs" Line="3" Column="27" />
+      <File FileName="SimpleServer\Program.cs" Line="29" Column="4" />
+      <File FileName="SimpleServer\Service\Service.cs" Line="15" Column="4" />
+      <File FileName="SimpleServer\app.config" Line="20" Column="16" />
     </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="SimpleServer" expanded="True">
+            <Node name="SimpleServer" expanded="True">
+              <Node name="References" expanded="True" />
+              <Node name="Service" expanded="True" />
+              <Node name="Tools" expanded="True" />
+              <Node name="Program.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.SimpleServer PreferredExecutionTarget="MonoDevelop.Default" />
